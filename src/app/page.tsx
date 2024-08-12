@@ -1,95 +1,85 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import React, { useState, useEffect } from 'react';
+import styles from './page.module.css';
 
-export default function Home() {
+const drumPads = [
+  { key: 'Q', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3', name: 'Heater 1' },
+  { key: 'W', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3', name: 'Heater 2' },
+  { key: 'E', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3', name: 'Heater 3' },
+  { key: 'A', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3', name: 'Heater 4' },
+  { key: 'S', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3', name: 'Clap' },
+  { key: 'D', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3', name: 'Open-HH' },
+  { key: 'Z', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3', name: 'Kick-n\'-Hat' },
+  { key: 'X', audio: 'https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3', name: 'Kick' },
+  { key: 'C', audio: 'https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3', name: 'Closed-HH' },
+];
+
+export default function DrumMachine() {
+  const [displayText, setDisplayText] = useState('');
+  const [power, setPower] = useState(true);
+  const [volume, setVolume] = useState(1);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (power) {
+        const pad = drumPads.find(p => p.key === event.key.toUpperCase());
+        if (pad) {
+          playSound(pad.audio, pad.name);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [power, volume]);
+
+  const playSound = (audio: string, name: string) => {
+    const sound = new Audio(audio);
+    sound.volume = volume;
+    sound.play();
+    setDisplayText(name);
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className={styles.container}>
+      <div id="drum-machine" className={styles.drumMachine}>
+        <div className={styles.controls}>
+          <button
+            className={`${styles.powerButton} ${power ? styles.on : styles.off}`}
+            onClick={() => setPower(!power)}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            {power ? 'ON' : 'OFF'}
+          </button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className={styles.volumeControl}
+          />
+        </div>
+        <div id="display" className={styles.display}>{displayText}</div>
+        <div className={styles.padGrid}>
+          {drumPads.map((pad) => (
+            <button
+              key={pad.key}
+              className={`${styles.drumPad} drum-pad`}
+              id={pad.name.replace(/\s+/g, '-')}
+              onClick={() => power && playSound(pad.audio, pad.name)}
+            >
+              {pad.key}
+              <audio className="clip" id={pad.key} src={pad.audio}></audio>
+            </button>
+          ))}
         </div>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <footer className={styles.footer}>
+        Created by <a href="https://github.com/wweziza" target="_blank" rel="noopener noreferrer">weziza</a>
+      </footer>
+    </div>
   );
 }
